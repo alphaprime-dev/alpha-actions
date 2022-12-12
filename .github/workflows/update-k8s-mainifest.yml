@@ -1,0 +1,36 @@
+name: Reusable Workflow For Deploy
+on:
+  workflow_call:
+    inputs:
+      key:
+        required: true
+        type: string
+      value:
+        required: true
+        type: string
+      target-repository:
+        required: true
+        type: string
+      target-branch:
+        required: true
+        type: string
+      file-path:
+        required: true
+        type: string
+
+jobs:
+  update-k8s-mainifest:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Bump up k8s manifests
+        uses: alphaprime-dev/fix-yaml-in-another-repo@main
+        with:
+          token: ${{ secrets.ACTIONS_TOKEN }}
+          target_repository: ${{ inputs.target-repository }}
+          target_branch: ${{ inputs.target-branch }}
+          file_path: ${{ inputs.file-path }}
+          commit_message: Bump up ${{ github.repository }} to ${{ inputs.value }}
+          values: |
+            {
+              "${{ inputs.key }}": "${{ inputs.value }}"
+            }

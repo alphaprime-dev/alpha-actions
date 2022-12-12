@@ -1,0 +1,14 @@
+name: PR Version Labeler
+
+on:
+  workflow_call:
+
+jobs:
+  version-labeler:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: srvaroa/labeler@master
+        with:
+          config_path: .github/pr-version-labeler.yml
+        env:
+          GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'

@@ -1,0 +1,24 @@
+name: Reusable Workflow For Notify Teams
+on:
+  workflow_call:
+    inputs:
+      image-tag:
+        required: true
+        type: string
+      environment:
+        required: true
+        type: string
+jobs:
+  notify-teams:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: toko-bifrost/ms-teams-deploy-card@master
+        if: always()
+        with:
+          github-token: ${{ github.token }}
+          webhook-uri: ${{ secrets.WEBHOOK_URI }}
+          environment: ${{ inputs.environment }}
+          timezone: Asia/Seoul
+          custom-facts: |
+            - name: Version
+              value: ${{ inputs.image-tag }}

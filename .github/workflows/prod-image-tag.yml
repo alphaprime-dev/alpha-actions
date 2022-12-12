@@ -1,0 +1,18 @@
+name: Get Image Tag By Release Tag
+on:
+  workflow_call:
+    outputs:
+      image-tag:
+        description: "IMAGE_TAG FROM RELEASE TAG"
+        value: ${{ jobs.prod-image-tag.outputs.RELEASE_TAG }}
+
+jobs:
+  prod-image-tag:
+    runs-on: ubuntu-latest
+    outputs:
+      RELEASE_TAG: ${{ steps.release-tag.outputs.RELEASE_TAG }}
+
+    steps:
+      - uses: actions/checkout@v3
+      - id: release-tag
+        run: echo "RELEASE_TAG=${GITHUB_REF#refs/*/}" >> $GITHUB_OUTPUT
