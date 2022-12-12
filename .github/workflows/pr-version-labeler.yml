@@ -2,6 +2,9 @@ name: PR Version Labeler
 
 on:
   workflow_call:
+  
+  pull_request:
+    types: [opened, edited]
 
 jobs:
   version-labeler:
