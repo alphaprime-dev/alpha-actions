@@ -1,0 +1,20 @@
+name: Get Image Tag By COMMIT SHA
+on:
+  workflow_call:
+    outputs:
+      image-tag:
+        description: "IMAGE_TAG FROM COMMIT SHA"
+        value: ${{ jobs.staging-image-tag.outputs.SHA }}
+
+jobs:
+  staging-image-tag:
+    runs-on: ubuntu-latest
+    outputs:
+      SHA: ${{ steps.SHA.outputs.SHA }}
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: benjlevesque/short-sha@v1.2
+        id: short-sha
+      - id: SHA
+        run: echo "SHA=${{ steps.short-sha.outputs.sha }}" >> $GITHUB_OUTPUT
