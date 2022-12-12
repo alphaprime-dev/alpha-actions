@@ -2,6 +2,9 @@ name: Reusable Workflow For Draft-Release
 
 on:
   workflow_call:
+  
+  pull_request:
+    types: [closed]
 
 jobs:
   draft-release:
