@@ -3,6 +3,9 @@ tag-template: 'v$RESOLVED_VERSION'
 template: |
   ## Changes
   $CHANGES
+
+  **Full Changelog**: https://github.com/$OWNER/$REPOSITORY/compare/$PREVIOUS_TAG...v$RESOLVED_VERSION
+  
 sort-by: 'title'
 version-resolver:
   minor:
