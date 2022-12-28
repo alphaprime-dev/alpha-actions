@@ -9,11 +9,11 @@ on:
 jobs:
   draft-release:
     runs-on: ubuntu-latest
-    if: github.event.pull_request.merged == true && github.base_ref == 'main' && !startsWith(github.head_ref, 'hotfix/')
+    if: github.event.pull_request.merged == true && github.base_ref == 'main'
     steps:
       - name: Release drafter
         uses: release-drafter/release-drafter@v5
         with:
-          config-name: config.yml
+          config-name: config.yaml
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
