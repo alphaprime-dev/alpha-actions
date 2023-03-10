@@ -28,7 +28,9 @@ jobs:
       - name: Create Discord Message
         id: message
         run: | 
-          echo 'msg=${{ tojson('{"agc":"abs"}') }}' >> $GITHUB_OUTPUT
+          echo 'msg=${{ tojson('{
+          "agc":"abs"
+          }') }}' >> $GITHUB_OUTPUT
 
       - name: Send HTTP POST request
         run: echo ${{steps.message.outputs.msg}}
