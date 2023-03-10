@@ -27,7 +27,7 @@ jobs:
     steps:
       - name: Send HTTP POST request
         run: |
-          echo '{"content": "test in github actions" }'
+          echo '{"content": "test github actions","embeds": null,"attachments": []}'
           curl -X POST 'https://discord.com/api/webhooks/1062906330001723463/jFCyiTAA2Qi_427spFDTHQjQexN6d1Hwar63d2bz22xGDaBcwlm2pbHcwKnTtlw2_HxT' \
           -H 'Content-Type: application/json' \
           -d @-
