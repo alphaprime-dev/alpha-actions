@@ -25,11 +25,14 @@ jobs:
   notify-discord:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v3
+
       - name: Send HTTP POST request
         run: |
-          curl -X POST https://discord.com/api/webhooks/1062906330001723463/jFCyiTAA2Qi_427spFDTHQjQexN6d1Hwar63d2bz22xGDaBcwlm2pbHcwKnTtlw2_HxT 
-          -H 'Content-Type: application/json' 
-          -d '{  
+          curl -X POST https://discord.com/api/webhooks/1062906330001723463/jFCyiTAA2Qi_427spFDTHQjQexN6d1Hwar63d2bz22xGDaBcwlm2pbHcwKnTtlw2_HxT \
+          -H 'Content-Type: application/json' \
+          -d >-
+          {  
             "content": null, 
             "embeds": [ 
               { 
