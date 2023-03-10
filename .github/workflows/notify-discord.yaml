@@ -28,12 +28,12 @@ jobs:
       - name: Create Discord Message
         id: message
         run: | 
-          echo "::set-output name=msg::
+          echo "msg=
           '{
             "content": "hi", 
             "embeds": null, 
             "attachments": [] 
-          }'"
+          }'" >> $GITHUB_OUTPUT
 
       - name: Send HTTP POST request
         run: echo ${{steps.message.outputs.msg}}
