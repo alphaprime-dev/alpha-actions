@@ -28,12 +28,8 @@ jobs:
       - name: Create Discord Message
         id: message
         run: | 
-          echo 'msg=
-          ${{ toJSON(fromJSON('{
-            "content": "hi", 
-            "embeds": null, 
-            "attachments": [] 
-          }')) }}'  >> $GITHUB_OUTPUT
+          echo "msg=
+          ${{ tojson('hello') }}" >> $GITHUB_OUTPUT
 
       - name: Send HTTP POST request
         run: echo ${{steps.message.outputs.msg}}
@@ -45,30 +41,27 @@ jobs:
           # -d $"{{steps.message.outputs.}}"
 
 
-# "embeds": [
-#               {
-#                 "title": "Release Completed",
-#                 "description": "---\n\n[alphaprime-dev/alphaprime-api-bot] version v0.5.1 image is pushed \n\n[Go to Argo CD](https://argocd.alphasquare.co.kr/applications/data-server-prod )\n\n---",
-#                 "color": 5795484,
-#                 "fields": [
-#                   {
-#                     "name": "Environment",
-#                     "value": "PROD",
-#                     "inline": true
-#                   },
-#                   {
-#                     "name": "Repository",
-#                     "value": "[alphaprime-api-bot](https://github.com/alphaprime-dev/alphasquare-main-server/tree/refs/tags/v23.1.0)",
-#                     "inline": true
-#                   },
-#                   {
-#                     "name": "Release Note",
-#                     "value": "[v0.5.1](https://github.com/alphaprime-dev/alphaprime-api-bot/releases/tag/v0.5.1)",
-#                     "inline": true
-#                   }
-#                 ],
-#                 "author": {
-#                   "name": "alphaprime-api-bot"
-#                 }
-#               }
-#             ],
+"embeds": [{"title": "Release Completed","description": "---\n\n[alphaprime-dev/alphaprime-api-bot] version v0.5.1 image is pushed \n\n[Go to Argo CD](https://argocd.alphasquare.co.kr/applications/data-server-prod )\n\n---",
+"color": 5795484,
+"fields": [
+{
+"name": "Environment",
+"value": "PROD",
+"inline": true
+},
+{
+"name": "Repository",
+                    "value": "[alphaprime-api-bot](https://github.com/alphaprime-dev/alphasquare-main-server/tree/refs/tags/v23.1.0)",
+                    "inline": true
+                  },
+                  {
+                    "name": "Release Note",
+                    "value": "[v0.5.1](https://github.com/alphaprime-dev/alphaprime-api-bot/releases/tag/v0.5.1)",
+                    "inline": true
+                  }
+                ],
+                "author": {
+                  "name": "alphaprime-api-bot"
+                }
+              }
+            ],
