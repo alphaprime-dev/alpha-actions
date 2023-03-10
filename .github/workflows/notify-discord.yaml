@@ -28,7 +28,8 @@ jobs:
       - name: Create Discord Message
         id: message
         run: | 
-          echo "::set-output name=msg::'{
+          echo "::set-output name=msg::
+          '{
             "content": "hi", 
             "embeds": null, 
             "attachments": [] 
