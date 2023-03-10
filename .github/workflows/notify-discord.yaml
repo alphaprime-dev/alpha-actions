@@ -33,7 +33,7 @@ jobs:
             "content": "hi", 
             "embeds": null, 
             "attachments": [] 
-          }') }}  >> $GITHUB_OUTPUT
+          }') }}'  >> $GITHUB_OUTPUT
 
       - name: Send HTTP POST request
         run: echo ${{steps.message.outputs.msg}}
