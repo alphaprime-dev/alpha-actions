@@ -22,7 +22,7 @@ class DiscordClient:
     
     def send_message(self) -> None:
         
-        embed = self.create_embed(self.env, self.repo, self.tag)
+        embed = self.create_embed()
         webhook = DiscordWebhook(self.webhook_url)
         webhook.add_embed(embed)
         webhook.execute()
