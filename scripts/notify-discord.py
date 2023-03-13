@@ -28,10 +28,10 @@ class DiscordClient:
         embed.set_author(name=repo)
         embed.set_title(title="릴리즈 완료")
         embed.set_description(self._get_description(env, repo, tag))
-        deploy_tool = "Argo CD" if repo != "alphacrawler" else "Airflow"
+        
         embed.add_embed_field(
             name="Deploy",
-            value=f"[{deploy_tool} 바로가기]({self._get_deploy_link(repo, tag)})",
+            value=self._get_deploy_link(repo),
             inline=True
         )
         embed.add_embed_field(
@@ -56,7 +56,7 @@ class DiscordClient:
 
     def _get_deploy_link(self, repo: str) -> str:
         if repo == "alphacrawler":
-            return "https://airflow.alphasquare.co.kr/variable/list/"
+            return "[Airflow](https://airflow.alphasquare.co.kr/variable/list)"
         ENDPOINT = {
             "alphasquare-main-server": " main-server-prod",
             "alphasquare-chartgame" : "chartgame-prod",
@@ -64,7 +64,7 @@ class DiscordClient:
             "alphasquare-real-trading-server" : "real-trading-prod",
             "alphasquare-socketio-server" : "socketio-prod",
         }
-        return f"https://argocd.alphasquare.co.kr/applications/{ENDPOINT[repo]}"
+        return f"[Argo CD](https://argocd.alphasquare.co.kr/applications/{ENDPOINT[repo]})"
 
 
 
