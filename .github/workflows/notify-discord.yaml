@@ -30,6 +30,10 @@ jobs:
         with:
           python-version: '3.10'
       - run: |
+          echo ${{ inputs.environment }}
+          echo ${{ inputs. }}
+          echo ${{ inputs.image-tag }}
+          echo ${{ github.ref}}
           python -m pip install --upgrade pip
           pip install discord-webhook click
           python scripts/notify-discord.py --env=PROD --repo=alphasquare-main-server --tag=v22.22.0

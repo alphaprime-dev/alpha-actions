@@ -26,7 +26,7 @@ class DiscordClient:
     def create_embed(self, env:str, repo: str, tag: str) -> DiscordEmbed:
         embed = DiscordEmbed(color="03b2f8")
         embed.set_author(name=repo)
-        embed.set_title(title="릴리즈 완료")
+        embed.set_title(title="🔔 릴리즈 완료 🔔")
         embed.set_description(self._get_description(env, repo, tag))
         
         embed.add_embed_field(
@@ -44,15 +44,15 @@ class DiscordClient:
             value=f"[{repo}](https://github.com/alphaprime-dev/{repo})",
             inline=True
         )
-        embed.set_timestamp()
         return embed
 
 
     def _get_description(self, env: str, repo: str, tag: str) -> str:
         return f"""
-        [{env}]{repo}의 {tag} 이미지가 빌드 & 푸쉬 되었습니다.
+        **{env}**
+        {repo} 의 {tag} 이미지가 빌드 & 푸쉬 되었습니다.
         
-        ✈️ deploy를 진행해주세요 ✈️
+        Deploy를 진행해주세요 ✈️
 
         """
 
