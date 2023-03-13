@@ -37,14 +37,19 @@ jobs:
       - name: print message
         run: echo ${{steps.message.outputs.msg}}
 
-      - name: Send HTTP POST request
-        
-        
-        run: |
-          curl -X POST \
-          https://discord.com/api/webhooks/1062906330001723463/jFCyiTAA2Qi_427spFDTHQjQexN6d1Hwar63d2bz22xGDaBcwlm2pbHcwKnTtlw2_HxT \
-          -H 'Content-Type: application/json' \
-          -d '${{steps.message.outputs.msg}}'
+      - uses: fjogeleit/http-request-action@v1
+        with:
+          url: 'https://discord.com/api/webhooks/1062906330001723463/jFCyiTAA2Qi_427spFDTHQjQexN6d1Hwar63d2bz22xGDaBcwlm2pbHcwKnTtlw2_HxT'
+          method: 'POST'
+          customHeaders: '{"Content-Type": "application/json"}'
+          data: ${{steps.message.outputs.msg}}
+
+      # - name: Send HTTP POST request
+      #   run: |
+      #     curl -X POST \
+      #     https://discord.com/api/webhooks/1062906330001723463/jFCyiTAA2Qi_427spFDTHQjQexN6d1Hwar63d2bz22xGDaBcwlm2pbHcwKnTtlw2_HxT \
+      #     -H 'Content-Type: application/json' \
+      #     -d ${{steps.message.outputs.msg}}
 
 
 # "embeds": [{"title": "Release Completed","description": "---\n\n[alphaprime-dev/alphaprime-api-bot] version v0.5.1 image is pushed \n\n[Go to Argo CD](https://argocd.alphasquare.co.kr/applications/data-server-prod )\n\n---",
