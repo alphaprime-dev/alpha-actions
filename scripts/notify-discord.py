@@ -27,7 +27,13 @@ class DiscordClient:
         embed = DiscordEmbed(color="03b2f8")
         embed.set_author(name=repo)
         embed.set_title(title="🔔 릴리즈 완료 🔔")
-        embed.set_description(self._get_description(env, repo, tag))
+
+        repo_name = repo.split("/")[1]
+        embed.set_description(f"""
+        **{env}**
+        {repo_name} 의 {tag} 이미지가 빌드 & 푸쉬 되었습니다.
+        Deploy를 진행해주세요 ✈️
+        """)
         
         embed.add_embed_field(
             name="Deploy",
@@ -41,18 +47,11 @@ class DiscordClient:
         )
         embed.add_embed_field(
             name="Repository",
-            value=f"[{repo}](https://github.com/{repo})",
+            value=f"[{repo_name}](https://github.com/{repo})",
             inline=True
         )
         return embed
 
-
-    def _get_description(self, env: str, repo: str, tag: str) -> str:
-        return f"""
-        **{env}**
-        {repo.split("/")[1]} 의 {tag} 이미지가 빌드 & 푸쉬 되었습니다.
-        Deploy를 진행해주세요 ✈️
-        """
 
     def _get_deploy_link(self, repo: str) -> str:
         if repo == "alphacrawler":
