@@ -50,15 +50,17 @@ class DiscordClient:
 
     def _get_description(self, env: str, repo: str, tag: str) -> str:
         return f"""
-        {env}의 {repo} {tag} 이미지가 빌드 & 푸쉬 되었습니다.
-        deploy를 진행해주세요.
+        [{env}]{repo}의 {tag} 이미지가 빌드 & 푸쉬 되었습니다.
+        
+        ✈️ deploy를 진행해주세요 ✈️
+
         """
 
     def _get_deploy_link(self, repo: str) -> str:
         if repo == "alphacrawler":
             return "[Airflow](https://airflow.alphasquare.co.kr/variable/list)"
         ENDPOINT = {
-            "alphasquare-main-server": " main-server-prod",
+            "alphasquare-main-server": "main-server-prod",
             "alphasquare-chartgame" : "chartgame-prod",
             "alphasquare-data-server" : "data-server-prod",
             "alphasquare-real-trading-server" : "real-trading-prod",
