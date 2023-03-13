@@ -7,7 +7,6 @@ import click
 def main(repo: str, tag: str) -> None:
     webhook_url = "https://discord.com/api/webhooks/1062906330001723463/jFCyiTAA2Qi_427spFDTHQjQexN6d1Hwar63d2bz22xGDaBcwlm2pbHcwKnTtlw2_HxT" # noqa
     discord_client = DiscordClient(webhook_url, repo, tag)
-    print("send message")
     discord_client.send_message()
 
 class DiscordClient:
@@ -68,6 +67,5 @@ class DiscordClient:
 
 
 
-
-
-
+if __name__ == "__main__":
+    main()
