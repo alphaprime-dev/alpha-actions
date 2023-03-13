@@ -44,7 +44,7 @@ jobs:
           curl -X POST \
           https://discord.com/api/webhooks/1062906330001723463/jFCyiTAA2Qi_427spFDTHQjQexN6d1Hwar63d2bz22xGDaBcwlm2pbHcwKnTtlw2_HxT \
           -H 'Content-Type: application/json' \
-          -d ${{steps.message.outputs.msg}}
+          -d '${{steps.message.outputs.msg}}'
 
 
 # "embeds": [{"title": "Release Completed","description": "---\n\n[alphaprime-dev/alphaprime-api-bot] version v0.5.1 image is pushed \n\n[Go to Argo CD](https://argocd.alphasquare.co.kr/applications/data-server-prod )\n\n---",
