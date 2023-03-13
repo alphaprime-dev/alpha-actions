@@ -36,12 +36,12 @@ class DiscordClient:
         )
         embed.add_embed_field(
             name="Release Note",
-            value=f"[{tag}](https://github.com/alphaprime-dev/{repo}/releases/tag/{tag})",
+            value=f"[{tag}](https://github.com/{repo}/releases/tag/{tag})",
             inline=True
         )
         embed.add_embed_field(
             name="Repository",
-            value=f"[{repo}](https://github.com/alphaprime-dev/{repo})",
+            value=f"[{repo}](https://github.com/{repo})",
             inline=True
         )
         return embed
@@ -50,21 +50,19 @@ class DiscordClient:
     def _get_description(self, env: str, repo: str, tag: str) -> str:
         return f"""
         **{env}**
-        {repo} 의 {tag} 이미지가 빌드 & 푸쉬 되었습니다.
-        
+        {repo.split("/")[1]} 의 {tag} 이미지가 빌드 & 푸쉬 되었습니다.
         Deploy를 진행해주세요 ✈️
-
         """
 
     def _get_deploy_link(self, repo: str) -> str:
         if repo == "alphacrawler":
             return "[Airflow](https://airflow.alphasquare.co.kr/variable/list)"
         ENDPOINT = {
-            "alphasquare-main-server": "main-server-prod",
-            "alphasquare-chartgame" : "chartgame-prod",
-            "alphasquare-data-server" : "data-server-prod",
-            "alphasquare-real-trading-server" : "real-trading-prod",
-            "alphasquare-socketio-server" : "socketio-prod",
+            "alphaprime-dev/alphasquare-main-server": "main-server-prod",
+            "alphaprime-dev/alphasquare-chartgame" : "chartgame-prod",
+            "alphaprime-dev/alphasquare-data-server" : "data-server-prod",
+            "alphaprime-dev/alphasquare-real-trading-server" : "real-trading-prod",
+            "alphaprime-dev/alphasquare-socketio-server" : "socketio-prod",
         }
         return f"[Argo CD](https://argocd.alphasquare.co.kr/applications/{ENDPOINT[repo]})"
 
