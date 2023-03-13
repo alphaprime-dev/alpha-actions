@@ -29,8 +29,9 @@ jobs:
         id: message
         run: | 
           echo 'msg=${{ tojson('{
-            "agc":"abs",
-            "asdfas":"asdfasd"
+            "content": "test github actions",
+            "embeds": null,
+            "attachments": []
           }') }}' >> $GITHUB_OUTPUT
 
       - name: Send HTTP POST request
