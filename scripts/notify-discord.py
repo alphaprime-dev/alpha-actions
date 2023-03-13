@@ -34,7 +34,7 @@ class DiscordClient:
         {repo_name} 의 {tag} 이미지가 빌드 & 푸쉬 되었습니다.
         Deploy를 진행해주세요 ✈️
         """)
-        
+
         embed.add_embed_field(
             name="Deploy",
             value=self._get_deploy_link(repo),
@@ -46,8 +46,8 @@ class DiscordClient:
             inline=True
         )
         embed.add_embed_field(
-            name="Repository",
-            value=f"[{repo_name}](https://github.com/{repo})",
+            name="Actions Workflow",
+            value=f"[{repo_name}](https://github.com/{repo}/actions)",
             inline=True
         )
         return embed
