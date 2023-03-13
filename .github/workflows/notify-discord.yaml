@@ -1,4 +1,4 @@
-name: test workflow
+name: Reusable Workflow For Notify Discord
 
 on:
   workflow_call:
