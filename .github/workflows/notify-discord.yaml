@@ -1,20 +1,14 @@
 name: test workflow
 
 on:
-  # workflow_call:
-  #   inputs:
-  #     image-tag: #얘가 버전일듯함
-  #       required: true
-  #       type: string
-  #     environment:
-  #       required: true
-  #       type: string
-  #     # 필요한 내용 사용처에서 보내주는 거 정리
-  #       # repo
-  #       # 릴리즈 노트 링크 https://github.com/alphaprime-dev/alphasquare-main-server/releases/tag/v23.1.0
-  #       # 릴리즈 버전 image-tag
-  #       # argocd 링크  https://argocd.alphasquare.co.kr/applications/data-server-prod
-      
+  workflow_call:
+    inputs:
+      image-tag: #얘가 버전일듯함
+        required: true
+        type: string
+      environment:
+        required: true
+        type: string
   
   push:
     branches: 
@@ -32,7 +26,7 @@ jobs:
       - run: |
           echo ${{ inputs.environment }}
           echo ${{ inputs.image-tag }}
-          echo ${{ github.ref}}
+          echo ${{ github.repository }}
           python -m pip install --upgrade pip
           pip install discord-webhook click
           python scripts/notify-discord.py --env=PROD --repo=alphasquare-main-server --tag=v22.22.0
