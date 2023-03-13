@@ -10,10 +10,6 @@ on:
         required: true
         type: string
   
-  push:
-    branches: 
-      - feat/notify-discord
-  
 jobs:
   notify-discord:
     runs-on: ubuntu-latest
