@@ -10,7 +10,7 @@ on:
   #       required: true
   #       type: string
   #     # 필요한 내용 사용처에서 보내주는 거 정리
-  #       # 레포 이름
+  #       # repo
   #       # 릴리즈 노트 링크 https://github.com/alphaprime-dev/alphasquare-main-server/releases/tag/v23.1.0
   #       # 릴리즈 버전 image-tag
   #       # argocd 링크  https://argocd.alphasquare.co.kr/applications/data-server-prod
@@ -31,7 +31,7 @@ jobs:
           python-version: '3.10'
       - run: |
           python -m pip install --upgrade pip
-          pip install requests
-          python scripts/notify-discord.py
+          pip install discord-webhook click
+          python scripts/notify-discord.py --repo=alphasquare-main-server --env=PROD --tag=v22.22.0
 
 
