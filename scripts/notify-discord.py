@@ -15,4 +15,7 @@ req = urllib.request.Request(
     method="POST"
 )
 
-res = urllib.request.urlopen(req)
+try:
+    res = urllib.request.urlopen(req)
+except Exception as e:
+    print(f"Error: {e}")
