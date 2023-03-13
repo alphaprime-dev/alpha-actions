@@ -28,7 +28,11 @@ jobs:
       - name: Create Discord Message
         id: message
         run: | 
-          echo 'msg=${{ tojson('{"content": "test github actions","embeds": null,"attachments": []}') }}' >> $GITHUB_OUTPUT
+          echo 'msg=${{ tojson('{
+            'content': 'test github actions',
+            'embeds;: null,
+            'attachments': []
+          }') }}' >> $GITHUB_OUTPUT
 
       - name: print message
         run: echo ${{steps.message.outputs.msg}}
@@ -38,7 +42,7 @@ jobs:
           url: 'https://discord.com/api/webhooks/1062906330001723463/jFCyiTAA2Qi_427spFDTHQjQexN6d1Hwar63d2bz22xGDaBcwlm2pbHcwKnTtlw2_HxT'
           method: 'POST'
           customHeaders: '{"Content-Type": "application/json"}'
-          data: '${{steps.message.outputs.msg}}'
+          data: ${{steps.message.outputs.msg}}
 
       # - name: Send HTTP POST request
       #   run: |
