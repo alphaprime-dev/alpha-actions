@@ -30,7 +30,7 @@ jobs:
         run: | 
           echo 'msg=${{ tojson('{
             'content': 'test github actions',
-            'embeds;: null,
+            'embeds': null,
             'attachments': []
           }') }}' >> $GITHUB_OUTPUT
 
