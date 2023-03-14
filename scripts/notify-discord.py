@@ -29,9 +29,11 @@ class DiscordClient:
         webhook.execute()
 
     def create_embed(self) -> DiscordEmbed:
-        status = "성공" if self.status == "true" else "실패"
-        symbol = "🔔" if self.status == "true" else "❌"
-        embed = DiscordEmbed(color="03b2f8")
+        if self.status == "true":
+            status, symbol, color = "성공", "🔔", "03b2f8"
+        else:
+            status, symbol, color = "실패", "❌", "ff0000"
+        embed = DiscordEmbed(color=color)
         embed.set_author(name=self.repo)
         embed.set_title(title=f"{symbol} 릴리즈 {status} {symbol}")
         repo_name = self.repo.split("/")[1]
