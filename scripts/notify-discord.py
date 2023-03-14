@@ -3,22 +3,24 @@ from discord_webhook import DiscordEmbed, DiscordWebhook
 import click
 
 @click.command(help="CLI for sending message to discord.")
-@click.option("--url", "-u", type=click.STRING, required=True)
+@click.option("--webhook_url", "-w", type=click.STRING, required=True)
 @click.option("--status", "-s", type=click.STRING, required=True)
 @click.option("--env", "-e", type=click.STRING, required=True)
 @click.option("--repo", "-r", type=click.STRING, required=True)
+@click.option("--related_link", "-l", type=click.STRING, required=True)
 @click.option("--tag", "-t", type=click.STRING, required=True)
 def main(url:str, status:str, env:str, repo: str, tag: str) -> None:
     discord_client = DiscordClient(url, status, env,  repo, tag)
     discord_client.send_message()
 
 class DiscordClient:
-    def __init__(self, webhook_url, status, env, repo, tag) -> None:
+    def __init__(self, webhook_url, status, env, repo, related_link, tag) -> None:
         self.webhook_url = webhook_url
-        self.status:Literal["true","false"] = status
-        self.env:str = env
-        self.repo:str = repo
-        self.tag:str = tag
+        self.status: Literal["true","false"] = status
+        self.env: str = env
+        self.repo: str = repo
+        self.related_link: str = related_link
+        self.tag: str = tag
     
     def send_message(self) -> None:
         
@@ -42,7 +44,7 @@ class DiscordClient:
 
         embed.add_embed_field(
             name="Deploy",
-            value=self._get_deploy_link(self.repo),
+            value=self.related_link,
             inline=True
         )
         embed.add_embed_field(
@@ -56,20 +58,6 @@ class DiscordClient:
             inline=True
         )
         return embed
-
-
-    def _get_deploy_link(self, repo: str) -> str:
-        if repo == "alphaprime-dev/alphacrawler":
-            return "[Airflow](https://airflow.alphasquare.co.kr/variable/list)"
-        ENDPOINT = {
-            "alphaprime-dev/alphasquare-main-server": "main-server-prod",
-            "alphaprime-dev/alphasquare-chartgame" : "chartgame-prod",
-            "alphaprime-dev/alphasquare-data-server" : "data-server-prod",
-            "alphaprime-dev/alphasquare-real-trading-server" : "real-trading-prod",
-            "alphaprime-dev/alphasquare-socketio-server" : "socketio-prod",
-        }
-        return f"[Argo CD](https://argocd.alphasquare.co.kr/applications/{ENDPOINT[repo]})"
-
 
 
 if __name__ == "__main__":
