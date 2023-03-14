@@ -1,0 +1,41 @@
+name: Reusable Workflow For Notify Discord
+
+on:
+  workflow_call:
+    inputs:
+      status: 
+        required: true
+        type: string
+      environment:
+        required: true
+        type: string
+      related-link:
+        required: true
+        type: string
+      image-tag:
+        required: true
+        type: string
+  
+jobs:
+  notify-discord:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          repository: alphaprime-dev/alpha-actions
+          ref: main
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      - run: |
+          python -m pip install --upgrade pip
+          pip install discord-webhook click
+          python scripts/notify-discord.py \
+          --webhook_url=${{ secrets.DISCORD_WEBHOOK_URI }} \
+          --status=${{ inputs.status }} \
+          --env=${{ inputs.environment }} \
+          --repo=${{ github.repository }} \
+          --related_link=${{ inputs.related-link }} \
+          --tag=${{ inputs.image-tag }}
+
+
