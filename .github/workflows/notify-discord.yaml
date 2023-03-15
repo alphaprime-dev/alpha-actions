@@ -31,7 +31,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install discord-webhook click
           python scripts/notify-discord.py \
-          --webhook_url="https://discord.com/api/webhooks/1062906330001723463/jFCyiTAA2Qi_427spFDTHQjQexN6d1Hwar63d2bz22xGDaBcwlm2pbHcwKnTtlw2_HxT" \
+          --webhook_url=${{ secrets.DISCORD_DEPLOY_WEBHOOK_URI }} \
           --status=${{ inputs.status }} \
           --env=${{ inputs.environment }} \
           --repo=${{ github.repository }} \
