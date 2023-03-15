@@ -35,7 +35,7 @@ jobs:
           --status=${{ inputs.status }} \
           --env=${{ inputs.environment }} \
           --repo=${{ github.repository }} \
-          --related_link=${{ inputs.related-link }} \
+          --related_link="${{ inputs.related-link }}" \
           --tag=${{ inputs.image-tag }}
 
 

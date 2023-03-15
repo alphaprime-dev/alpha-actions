@@ -9,8 +9,15 @@ import click
 @click.option("--repo", "-r", type=click.STRING, required=True)
 @click.option("--related_link", "-l", type=click.STRING, required=True)
 @click.option("--tag", "-t", type=click.STRING, required=True)
-def main(url:str, status:str, env:str, repo: str, tag: str) -> None:
-    discord_client = DiscordClient(url, status, env,  repo, tag)
+def main(
+    webhook_url:str,
+    status: str, 
+    env:str, 
+    repo: str, 
+    related_link: str, 
+    tag: str
+) -> None:
+    discord_client = DiscordClient(webhook_url, status, env, repo, related_link, tag)
     discord_client.send_message()
 
 class DiscordClient:
