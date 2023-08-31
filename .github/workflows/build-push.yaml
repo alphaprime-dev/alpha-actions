@@ -33,14 +33,6 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
-      - name: Set up github credential
-        run: |
-          echo "machine github.com" > ~/.netrc
-          echo "login github-actions" >> ~/.netrc
-          echo "password $ACTIONS_TOKEN" >> ~/.netrc
-        env:
-          ACTIONS_TOKEN: ${{ secrets.ACTIONS_TOKEN }}
-
       - name: Build and push
         uses: docker/build-push-action@v3
         with:
