@@ -35,8 +35,6 @@ jobs:
 
       - name: Build and push
         uses: docker/build-push-action@v3
-        env:
-          ACTIONS_TOKEN: ${{ secrets.ACTIONS_TOKEN }}
         with:
           context: .
           push: true
@@ -44,3 +42,5 @@ jobs:
           target: prod
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          secrets: |
+            "github_token=${{ secrets.ACTIONS_TOKEN }}"
