@@ -1,4 +1,4 @@
-name: Automated Release Process
+name: Create Release on Pyproject Version Change
 # Automatically create a release when a version specified in a pyproject.toml is changed.
 
 on:
