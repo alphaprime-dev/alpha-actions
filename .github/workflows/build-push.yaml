@@ -11,7 +11,9 @@ on:
       image-tag:
         required: true
         type: string
-
+      target:
+        required: false
+        type: string
 
 jobs:
   build-push:
@@ -39,7 +41,7 @@ jobs:
           context: .
           push: true
           tags: ${{ inputs.ecr-registry }}/${{ inputs.ecr-repository }}:${{ inputs.image-tag }}
-          target: prod
+          target: ${{ inputs.target || '' }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
           secrets: |
