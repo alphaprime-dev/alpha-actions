@@ -4,17 +4,17 @@ on:
     outputs:
       image-tag:
         description: "IMAGE_TAG FROM COMMIT SHA"
-        value: ${{ jobs.staging-image-tag.outputs.SHA }}
+        value: ${{ jobs.staging-image-tag.outputs.IMAGE_TAG }}
 
 jobs:
   staging-image-tag:
     runs-on: ubuntu-latest
     outputs:
-      SHA: ${{ steps.SHA.outputs.SHA }}
+      IMAGE_TAG: ${{ steps.IMAGE_TAG.outputs.IMAGE_TAG }}
 
     steps:
       - uses: actions/checkout@v3
       - uses: benjlevesque/short-sha@v1.2
         id: short-sha
-      - id: SHA
-        run: echo "SHA=${{ steps.short-sha.outputs.sha }}" >> $GITHUB_OUTPUT
+      - id: IMAGE_TAG
+        run: echo "IMAGE_TAG=staging-${{ steps.short-sha.outputs.sha }}" >> $GITHUB_OUTPUT
