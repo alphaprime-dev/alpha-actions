@@ -13,6 +13,6 @@ jobs:
       RELEASE_TAG: ${{ steps.release-tag.outputs.RELEASE_TAG }}
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - id: release-tag
         run: echo "RELEASE_TAG=${GITHUB_REF#refs/*/}" >> $GITHUB_OUTPUT

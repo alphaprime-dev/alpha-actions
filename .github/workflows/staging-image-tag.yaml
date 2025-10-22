@@ -13,8 +13,8 @@ jobs:
       IMAGE_TAG: ${{ steps.IMAGE_TAG.outputs.IMAGE_TAG }}
 
     steps:
-      - uses: actions/checkout@v3
-      - uses: benjlevesque/short-sha@v1.2
+      - uses: actions/checkout@v4
+      - uses: benjlevesque/short-sha@v2.2
         id: short-sha
       - id: IMAGE_TAG
         run: echo "IMAGE_TAG=staging-${{ steps.short-sha.outputs.sha }}" >> $GITHUB_OUTPUT
