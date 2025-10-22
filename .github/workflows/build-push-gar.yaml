@@ -1,66 +1,68 @@
 name: Reusable Workflow For Build-Push to Google Artifact Registry
 on:
-    workflow_call:
-        inputs:
-            gar-region:
-                type: string
-                default: "asia-northeast3"
-            gar-project-id:
-                required: true
-                type: string
-            gar-repository:
-                required: true
-                type: string
-            service-name:
-                required: true
-                type: string
-            image-tag:
-                required: true
-                type: string
-            workload-identity-provider:
-                required: true
-                type: string
-            service-account:
-                required: true
-                type: string
-            target:
-                required: false
-                type: string
+  workflow_call:
+    inputs:
+      gar-region:
+        type: string
+        default: "asia-northeast3"
+      gar-project-id:
+        required: true
+        type: string
+      gar-repository:
+        required: true
+        type: string
+      service-name:
+        required: true
+        type: string
+      image-tag:
+        required: true
+        type: string
+      workload-identity-provider:
+        required: true
+        type: string
+      service-account:
+        required: true
+        type: string
+      target:
+        required: false
+        type: string
 
 permissions:
-    contents: read
-    id-token: write
+  contents: read
+  id-token: write
 
 jobs:
-    build-push:
-        runs-on: ubuntu-latest
-        steps:
-            - uses: actions/checkout@v4
+  build-push:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
 
-            - name: Authenticate to Google Cloud
-              id: auth
-              uses: google-github-actions/auth@v3
-              with:
-                  workload_identity_provider: ${{ inputs.workload-identity-provider }}
-                  service_account: ${{ inputs.service-account }}
-                  token_format: "access_token"
+      - name: Authenticate to Google Cloud
+        id: auth
+        uses: google-github-actions/auth@v3
+        with:
+          workload_identity_provider: ${{ inputs.workload-identity-provider }}
+          service_account: ${{ inputs.service-account }}
+          token_format: "access_token"
 
-            - name: Set up Docker Buildx
-              uses: docker/setup-buildx-action@v2
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
 
-            - name: Log in to Google Artifact Registry
-              uses: docker/login-action@v3
-              with:
-                  registry: ${{ inputs.gar-region }}-docker.pkg.dev
-                  username: oauth2accesstoken
-                  password: ${{ steps.auth.outputs.access_token }}
+      - name: Log in to Google Artifact Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ inputs.gar-region }}-docker.pkg.dev
+          username: oauth2accesstoken
+          password: ${{ steps.auth.outputs.access_token }}
 
-            - name: Build and push
-              uses: docker/build-push-action@v3
-              with:
-                  context: .
-                  push: true
-                  tags: ${{ inputs.gar-region }}-docker.pkg.dev/${{ inputs.gar-project-id }}/${{ inputs.gar-repository }}/${{ inputs.service-name }}:${{ inputs.image-tag }}
-                  target: ${{ inputs.target || '' }}
-                  cache-from: type=gha
-                  cache-to: type=gha,mode=max
+      - name: Build and push
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          push: true
+          tags: ${{ inputs.gar-region }}-docker.pkg.dev/${{ inputs.gar-project-id }}/${{ inputs.gar-repository }}/${{ inputs.service-name }}:${{ inputs.image-tag }}
+          target: ${{ inputs.target || '' }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          secrets: |
+            "github_token=${{ secrets.ACTIONS_TOKEN }}"
