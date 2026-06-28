@@ -1,34 +1,33 @@
-from typing import Literal
-from discord_webhook import DiscordEmbed, DiscordWebhook
-import click
+from typing import Annotated, Literal
 
-@click.command(help="CLI for sending message to discord.")
-@click.option("--webhook_url", "-w", type=click.STRING, required=True)
-@click.option("--status", "-s", type=click.STRING, required=True)
-@click.option("--env", "-e", type=click.STRING, required=True)
-@click.option("--repo", "-r", type=click.STRING, required=True)
-@click.option("--related_link", "-l", type=click.STRING, required=True)
-@click.option("--tag", "-t", type=click.STRING, required=True)
+from discord_webhook import DiscordEmbed, DiscordWebhook
+import typer
+
+app = typer.Typer(help="CLI for sending message to discord.")
+
+
+@app.command()
 def main(
-    webhook_url:str,
-    status: str, 
-    env:str, 
-    repo: str, 
-    related_link: str, 
-    tag: str
+    webhook_url: Annotated[str, typer.Option("--webhook_url", "-w")],
+    status: Annotated[str, typer.Option("--status", "-s")],
+    env: Annotated[str, typer.Option("--env", "-e")],
+    repo: Annotated[str, typer.Option("--repo", "-r")],
+    related_link: Annotated[str, typer.Option("--related_link", "-l")],
+    tag: Annotated[str, typer.Option("--tag", "-t")],
 ) -> None:
     discord_client = DiscordClient(webhook_url, status, env, repo, related_link, tag)
     discord_client.send_message()
 
+
 class DiscordClient:
     def __init__(self, webhook_url, status, env, repo, related_link, tag) -> None:
         self.webhook_url = webhook_url
-        self.status: Literal["true","false"] = status
+        self.status: Literal["true", "false"] = status
         self.env: str = env
         self.repo: str = repo
         self.related_link: str = related_link
         self.tag: str = tag
-    
+
     def send_message(self) -> None:
         embed = self.create_embed()
         webhook = DiscordWebhook(self.webhook_url)
@@ -51,9 +50,7 @@ class DiscordClient:
         """)
 
         embed.add_embed_field(
-            name="Deploy",
-            value=self.related_link,
-            inline=True
+            name="Deploy", value=self.related_link, inline=True
         )
         embed.add_embed_field(
             name="Release Note",
@@ -69,4 +66,4 @@ class DiscordClient:
 
 
 if __name__ == "__main__":
-    main()
+    app()
