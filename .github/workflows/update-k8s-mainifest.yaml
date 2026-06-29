@@ -18,9 +18,9 @@ on:
         required: true
         type: string
     secrets:
-      APP_ID:
+      ALPHA_ACTIONS_APP_ID:
         required: true
-      APP_PRIVATE_KEY:
+      ALPHA_ACTIONS_APP_PRIVATE_KEY:
         required: true
 
 jobs:
@@ -49,15 +49,29 @@ jobs:
         id: app-token
         uses: actions/create-github-app-token@v2
         with:
-          app-id: ${{ secrets.APP_ID }}
-          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+          app-id: ${{ secrets.ALPHA_ACTIONS_APP_ID }}
+          private-key: ${{ secrets.ALPHA_ACTIONS_APP_PRIVATE_KEY }}
           owner: ${{ steps.target-repository.outputs.owner }}
           repositories: ${{ steps.target-repository.outputs.repository }}
+
+      - name: Resolve workflow repository
+        id: workflow-repository
+        env:
+          WORKFLOW_REF: ${{ github.workflow_ref }}
+        run: |
+          workflow_repository="${WORKFLOW_REF%%/.github/workflows/*}"
+
+          if [ "$workflow_repository" = "$WORKFLOW_REF" ] || [ -z "$workflow_repository" ]; then
+            echo "github.workflow_ref must include an alpha-actions workflow path." >&2
+            exit 1
+          fi
+
+          echo "repository=$workflow_repository" >> "$GITHUB_OUTPUT"
 
       - name: Checkout alpha-actions
         uses: actions/checkout@v4
         with:
-          repository: alphaprime-dev/alpha-actions
+          repository: ${{ steps.workflow-repository.outputs.repository }}
           ref: ${{ github.workflow_sha }}
           path: alpha-actions
 
