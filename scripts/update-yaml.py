@@ -15,9 +15,7 @@ class CliError(Exception):
 @app.command()
 def main(
     file_path: Annotated[Path, typer.Argument(help="Path to the YAML file to update.")],
-    key: Annotated[
-        str, typer.Argument(help="Dot-separated YAML key path, for example image.tag.")
-    ],
+    key: Annotated[str, typer.Argument(help="Dot-separated YAML key path, for example image.tag.")],
     value: Annotated[str, typer.Argument(help="Value to write to the YAML key.")],
 ) -> None:
     try:

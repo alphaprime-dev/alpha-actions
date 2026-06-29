@@ -18,9 +18,9 @@ on:
         required: true
         type: string
     secrets:
-      MANIFEST_UPDATE_APP_ID:
+      APP_ID:
         required: true
-      MANIFEST_UPDATE_APP_PRIVATE_KEY:
+      APP_PRIVATE_KEY:
         required: true
 
 jobs:
@@ -49,8 +49,8 @@ jobs:
         id: app-token
         uses: actions/create-github-app-token@v2
         with:
-          app-id: ${{ secrets.MANIFEST_UPDATE_APP_ID }}
-          private-key: ${{ secrets.MANIFEST_UPDATE_APP_PRIVATE_KEY }}
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
           owner: ${{ steps.target-repository.outputs.owner }}
           repositories: ${{ steps.target-repository.outputs.repository }}
 

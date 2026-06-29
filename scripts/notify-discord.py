@@ -1,7 +1,7 @@
 from typing import Annotated, Literal
 
-from discord_webhook import DiscordEmbed, DiscordWebhook
 import typer
+from discord_webhook import DiscordEmbed, DiscordWebhook
 
 app = typer.Typer(help="CLI for sending message to discord.")
 
@@ -49,18 +49,16 @@ class DiscordClient:
         결과를 확인해 주세요 ✈️
         """)
 
-        embed.add_embed_field(
-            name="Deploy", value=self.related_link, inline=True
-        )
+        embed.add_embed_field(name="Deploy", value=self.related_link, inline=True)
         embed.add_embed_field(
             name="Release Note",
             value=f"[{self.tag}](https://github.com/{self.repo}/releases/tag/{self.tag})",
-            inline=True
+            inline=True,
         )
         embed.add_embed_field(
             name="Actions Workflow",
             value=f"[{repo_name}](https://github.com/{self.repo}/actions)",
-            inline=True
+            inline=True,
         )
         return embed
 
