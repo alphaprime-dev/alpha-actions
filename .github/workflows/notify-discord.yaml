@@ -20,24 +20,11 @@ jobs:
   notify-discord:
     runs-on: ubuntu-latest
     steps:
-      - name: Resolve workflow repository
-        id: workflow-repository
-        env:
-          WORKFLOW_REF: ${{ github.workflow_ref }}
-        run: |
-          workflow_repository="${WORKFLOW_REF%%/.github/workflows/*}"
-
-          if [ "$workflow_repository" = "$WORKFLOW_REF" ] || [ -z "$workflow_repository" ]; then
-            echo "github.workflow_ref must include an alpha-actions workflow path." >&2
-            exit 1
-          fi
-
-          echo "repository=$workflow_repository" >> "$GITHUB_OUTPUT"
-
       - uses: actions/checkout@v4
         with:
-          repository: ${{ steps.workflow-repository.outputs.repository }}
-          ref: ${{ github.workflow_sha }}
+          # https://docs.github.com/en/actions/reference/workflows-and-actions/contexts#job-context
+          repository: ${{ job.workflow_repository }}
+          ref: ${{ job.workflow_sha }}
       - uses: astral-sh/setup-uv@v8
         with:
           enable-cache: true
