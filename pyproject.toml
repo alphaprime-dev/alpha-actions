@@ -1,0 +1,41 @@
+[project]
+name = "alpha-actions"
+version = "0.1.0"
+requires-python = ">=3.11"
+dependencies = [
+    "discord-webhook>=1.4.1",
+    "pyyaml>=6.0.3",
+    "typer>=0.20.0",
+]
+
+[dependency-groups]
+dev = [
+    "prek>=0.3.1,<0.4.0",
+    "pytest>=8.4.2",
+    "ruff==0.14.14",
+]
+
+[tool.uv]
+required-version = ">=0.10.12"
+exclude-newer = "P30D"
+
+[tool.ruff]
+line-length = 100
+fix = true
+target-version = "py311"
+
+[tool.ruff.lint]
+select = [
+    "E",  # pycodestyle errors
+    "W",  # pycodestyle warnings
+    "F",  # pyflakes
+    "I",  # isort
+    "B",  # flake8-bugbear
+    "C4", # flake8-comprehensions
+    "UP", # pyupgrade
+]
+unfixable = ["B"]
+preview = true
+
+[tool.ruff.format]
+preview = true

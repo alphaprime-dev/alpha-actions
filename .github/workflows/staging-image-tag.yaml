@@ -17,4 +17,4 @@ jobs:
       - uses: benjlevesque/short-sha@v2.2
         id: short-sha
       - id: IMAGE_TAG
-        run: echo "IMAGE_TAG=staging-${{ steps.short-sha.outputs.sha }}" >> $GITHUB_OUTPUT
+        run: echo "IMAGE_TAG=staging-${{ steps.short-sha.outputs.sha }}" >> "$GITHUB_OUTPUT"

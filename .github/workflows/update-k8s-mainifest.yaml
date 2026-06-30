@@ -17,20 +17,88 @@ on:
       file-path:
         required: true
         type: string
+    secrets:
+      ALPHA_ACTIONS_APP_ID:
+        required: true
+      ALPHA_ACTIONS_APP_PRIVATE_KEY:
+        required: true
 
 jobs:
   update-k8s-mainifest:
     runs-on: ubuntu-latest
     steps:
-      - name: Bump up k8s manifests
-        uses: alphaprime-dev/fix-yaml-in-another-repo@main
+      - name: Resolve target repository
+        id: target-repository
+        env:
+          TARGET_REPOSITORY: ${{ inputs.target-repository }}
+        run: |
+          owner="${TARGET_REPOSITORY%%/*}"
+          repository="${TARGET_REPOSITORY#*/}"
+
+          if [ "$owner" = "$TARGET_REPOSITORY" ] || [ -z "$owner" ] || [ -z "$repository" ]; then
+            echo "target-repository must use owner/repository format." >&2
+            exit 1
+          fi
+
+          {
+            echo "owner=$owner"
+            echo "repository=$repository"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Generate GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@v2
         with:
-          token: ${{ secrets.ACTIONS_TOKEN }}
-          target_repository: ${{ inputs.target-repository }}
-          target_branch: ${{ inputs.target-branch }}
-          file_path: ${{ inputs.file-path }}
-          commit_message: Bump up ${{ github.repository }} to ${{ inputs.value }}
-          values: |
-            {
-              "${{ inputs.key }}": "${{ inputs.value }}"
-            }
+          app-id: ${{ secrets.ALPHA_ACTIONS_APP_ID }}
+          private-key: ${{ secrets.ALPHA_ACTIONS_APP_PRIVATE_KEY }}
+          owner: ${{ steps.target-repository.outputs.owner }}
+          repositories: ${{ steps.target-repository.outputs.repository }}
+
+      - name: Checkout alpha-actions
+        uses: actions/checkout@v4
+        with:
+          # https://docs.github.com/en/actions/reference/workflows-and-actions/contexts#job-context
+          repository: ${{ job.workflow_repository }}
+          ref: ${{ job.workflow_sha }}
+          path: alpha-actions
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v8
+        with:
+          enable-cache: true
+          cache-dependency-glob: alpha-actions/uv.lock
+
+      - name: Checkout target repository
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ inputs.target-repository }}
+          ref: ${{ inputs.target-branch }}
+          token: ${{ steps.app-token.outputs.token }}
+          path: target-repository
+
+      - name: Bump up k8s manifests
+        working-directory: alpha-actions
+        env:
+          FILE_PATH: ../target-repository/${{ inputs.file-path }}
+          UPDATE_KEY: ${{ inputs.key }}
+          UPDATE_VALUE: ${{ inputs.value }}
+        run: |
+          uv run python scripts/update-yaml.py "$FILE_PATH" "$UPDATE_KEY" "$UPDATE_VALUE"
+
+      - name: Commit and push k8s manifests
+        working-directory: target-repository
+        env:
+          COMMIT_MESSAGE: Bump up ${{ github.repository }} to ${{ inputs.value }}
+          FILE_PATH: ${{ inputs.file-path }}
+          TARGET_BRANCH: ${{ inputs.target-branch }}
+        run: |
+          if git diff --quiet -- "$FILE_PATH"; then
+            echo "No manifest changes to commit."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$FILE_PATH"
+          git commit -m "$COMMIT_MESSAGE"
+          git push origin "HEAD:$TARGET_BRANCH"
