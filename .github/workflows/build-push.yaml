@@ -14,12 +14,19 @@ on:
       target:
         required: false
         type: string
+      submodules:
+        required: false
+        type: string
+        default: "recursive"
 
 jobs:
   build-push:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: ${{ inputs.submodules }}
+          token: ${{ secrets.ACTIONS_TOKEN }}
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
