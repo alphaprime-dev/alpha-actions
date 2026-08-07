@@ -26,6 +26,10 @@ on:
       target:
         required: false
         type: string
+      submodules:
+        required: false
+        type: string
+        default: "recursive"
 
 permissions:
   contents: read
@@ -36,6 +40,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: ${{ inputs.submodules }}
+          token: ${{ secrets.ACTIONS_TOKEN }}
 
       - name: Authenticate to Google Cloud
         id: auth
