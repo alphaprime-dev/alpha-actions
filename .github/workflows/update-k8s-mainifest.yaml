@@ -55,7 +55,7 @@ jobs:
           repositories: ${{ steps.target-repository.outputs.repository }}
 
       - name: Checkout alpha-actions
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           # https://docs.github.com/en/actions/reference/workflows-and-actions/contexts#job-context
           repository: ${{ job.workflow_repository }}
@@ -63,14 +63,14 @@ jobs:
           path: alpha-actions
 
       - name: Set up uv
-        uses: astral-sh/setup-uv@v8.2.0
+        uses: astral-sh/setup-uv@fac544c07dec837d0ccb6301d7b5580bf5edae39 # v8.2.0
         with:
           version: "0.13.4"
           enable-cache: true
           cache-dependency-glob: alpha-actions/uv.lock
 
       - name: Checkout target repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           repository: ${{ inputs.target-repository }}
           ref: ${{ inputs.target-branch }}
