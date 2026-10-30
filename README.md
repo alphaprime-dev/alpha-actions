@@ -6,8 +6,6 @@ AlphaPrime 서비스에서 공통으로 사용하는 GitHub Actions 워크플로
 
 호출 저장소의 Dockerfile로 이미지를 빌드해 GAR에 push합니다. private 소스·서브모듈 checkout과 Docker 빌드 중 의존성 접근에는 `Contents: read`로 발급한 단기 GitHub App 토큰을 사용합니다.
 
-GAR 빌드는 GitHub App 인증을 사용합니다. 기존 `ACTIONS_TOKEN` 대신 아래 두 App secret을 전달하세요.
-
 ### 준비
 
 - 호출 저장소에 Dockerfile이 있어야 합니다. `target`을 지정한다면 해당 빌드 stage가 있어야 합니다.
@@ -65,13 +63,13 @@ jobs:
 | `submodules` | 기본값은 `recursive`. 서브모듈 checkout이 필요 없으면 문자열 `"false"`를 지정합니다. |
 | `target` | 선택할 Dockerfile 빌드 stage. 생략하면 Dockerfile의 기본 빌드 대상을 사용합니다. |
 
-다른 조직의 private 저장소는 이 조직 설치 토큰으로 접근할 수 없습니다. App 자체의 code 쓰기 권한과 이 빌드가 발급하는 읽기 전용 토큰 권한은 별개이므로, App 설치 범위를 늘리는 결정은 별도 승인이 필요합니다.
+다른 조직의 private 저장소는 이 조직 설치 토큰으로 접근할 수 없습니다. 빌드 토큰은 App 자체의 쓰기 권한과 관계없이 `Contents: read`로 발급됩니다.
 
 GAR의 `gar-region` 기본값은 `asia-northeast3`입니다. 전체 입력과 필수 secret은 [워크플로 정의](.github/workflows/build-push-gar.yaml)에서 확인할 수 있습니다. checkout 자격증명은 저장하지 않으며, 작업 종료 시 토큰 발급 Action이 토큰을 폐기합니다.
 
 ## Dockerfile 인증
 
-BuildKit secret ID는 기존과 동일한 `github_token`입니다. 토큰을 `ARG`·`ENV`·이미지 URL에 넣지 않고, secret을 마운트한 단일 명령에만 전달합니다. [base PR #2781](https://github.com/alphaprime-dev/alphasquare-base/pull/2781)의 `scripts/with-github-auth.sh`는 `gh` 설치 없이 Git credential helper를 해당 명령에만 적용합니다.
+BuildKit secret ID는 `github_token`입니다. 토큰을 `ARG`·`ENV`·이미지 URL에 넣지 않고, secret을 마운트한 단일 명령에만 전달합니다. [with-github-auth.sh](https://github.com/alphaprime-dev/alphasquare-base/blob/main/scripts/with-github-auth.sh)는 `gh` 설치 없이 Git credential helper를 해당 명령에만 적용합니다.
 
 ```dockerfile
 COPY scripts/with-github-auth.sh scripts/with-github-auth.sh
@@ -80,7 +78,7 @@ RUN --mount=type=secret,id=github_token,required \
     sh scripts/with-github-auth.sh uv sync --locked --no-install-project --no-editable --no-dev
 ```
 
-이 예제를 쓰려면 호출 저장소에 위 스크립트를 추가하고 기존 Dockerfile의 `.netrc` 인증을 대체합니다. 빌드에서 secret을 사용하지 않는 서비스도 private 소스 checkout을 위해 App 접근이 필요합니다.
+이 예제를 쓰려면 호출 저장소의 `scripts/with-github-auth.sh` 경로에 위 스크립트를 추가하세요. 빌드에서 secret을 사용하지 않는 서비스도 private 소스 checkout을 위해 App 접근이 필요합니다.
 
 ## 다른 공용 워크플로
 
