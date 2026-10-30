@@ -1,12 +1,35 @@
 # alpha-actions
 
-공용 이미지 빌드는 GAR(`build-push-gar.yaml`)와 ECR(`build-push.yaml`) 모두 GitHub App 토큰을 사용합니다. 호출 저장소의 checkout, 재귀 서브모듈 checkout, BuildKit `github_token` secret에 같은 단기 토큰을 전달합니다. 토큰은 `Contents: read`로 요청하며 checkout 자격증명을 저장하지 않고, 작업 종료 시 Action이 폐기합니다.
+AlphaPrime 서비스에서 공통으로 사용하는 GitHub Actions 워크플로입니다. GAR·ECR 이미지 빌드와 push, 이미지 태그 생성, 릴리스, 배포 manifest 갱신을 각 서비스 저장소에서 재사용할 수 있습니다.
 
-## 호출 계약
+## 이미지 빌드 시작하기
 
-기존 registry·image·target 입력은 유지합니다. `ACTIONS_TOKEN`을 전달하던 호출자는 아래 App secret 두 개에 접근할 수 있어야 합니다. ECR은 기존 AWS secret 두 개도 계속 필요합니다.
+호출 저장소의 Dockerfile로 이미지를 빌드해 GAR 또는 ECR에 push합니다. private 소스·서브모듈 checkout과 Docker 빌드 중 의존성 접근에는 `Contents: read`로 발급한 단기 GitHub App 토큰을 사용합니다.
+
+GAR·ECR 빌드는 GitHub App 인증을 사용합니다. 기존 `ACTIONS_TOKEN` 대신 아래 두 App secret을 전달하세요.
+
+### 준비
+
+- 호출 저장소에 Dockerfile이 있어야 합니다. `target`을 지정한다면 해당 빌드 stage가 있어야 합니다.
+- GitHub App이 **호출 저장소 자신과 필요한 private 직접·전이 의존성 및 서브모듈**에 설치되어 있어야 합니다. [서비스별 필요 저장소](docs/github-app-migration.md#소비자와-필요한-저장소-권한)를 확인하세요.
+- 호출 저장소에서 `ALPHA_ACTIONS_APP_ID`, `ALPHA_ACTIONS_APP_PRIVATE_KEY` secret에 접근할 수 있어야 합니다. `secrets: inherit`도 지원하지만 조직 secret의 허용 저장소가 늘어나지는 않습니다.
+- GAR은 대상 repository와 Workload Identity Provider·서비스 계정의 인증 및 push 권한을 준비해야 합니다. ECR은 대상 repository와 `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` secret 및 push 권한이 필요합니다.
+- Docker 빌드 중 private 의존성을 설치한다면 [Dockerfile 인증](#dockerfile-인증)도 설정하세요.
+
+### GAR에 빌드하고 push하기
+
+호출 저장소의 `.github/workflows/build-image.yaml`에 다음 파일을 추가합니다. GAR 설정과 `service-name`, `github-repositories`를 해당 서비스에 맞게 바꾸세요. 아래 저장소 목록은 `alphasquare-base`용입니다.
 
 ```yaml
+name: Build image
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
 jobs:
   build:
     uses: alphaprime-dev/alpha-actions/.github/workflows/build-push-gar.yaml@main
@@ -17,7 +40,6 @@ jobs:
       image-tag: example
       workload-identity-provider: projects/PROJECT_NUMBER/locations/global/workloadIdentityPools/POOL/providers/PROVIDER
       service-account: github-actions-sa@alphasquare.iam.gserviceaccount.com
-      target: prod
       github-repositories: |
         alphasquare-base
         alpha-contracts
@@ -30,15 +52,45 @@ jobs:
       ALPHA_ACTIONS_APP_PRIVATE_KEY: ${{ secrets.ALPHA_ACTIONS_APP_PRIVATE_KEY }}
 ```
 
-`secrets: inherit`도 지원합니다. ECR 호출은 `uses`를 `build-push.yaml`로 바꾸고 기존 `ecr-registry`, `ecr-repository`, `image-tag`, `target`을 사용합니다. 명시적으로 secret을 전달한다면 `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`도 포함해야 합니다.
+파일을 기본 브랜치에 추가한 뒤 GitHub Actions의 **Build image → Run workflow**에서 실행합니다. `image-tag: example`은 서비스의 태그 정책에 맞게 변경하세요.
+
+성공하면 `Build and push` 단계가 완료되고, 위 예제에서는 `asia-northeast3-docker.pkg.dev/alphasquare/alphasquare/alphasquare-base:example`에 이미지가 push됩니다. GAR에서 태그를 확인하세요. 서비스 배포는 별도입니다.
+
+### ECR을 사용하는 경우
+
+같은 파일에서 `permissions`는 `contents: read`만 남기고, `build` job을 아래 내용으로 교체합니다. registry·repository와 private 의존성 목록을 서비스에 맞게 바꾸세요.
+
+```yaml
+  build:
+    uses: alphaprime-dev/alpha-actions/.github/workflows/build-push.yaml@main
+    with:
+      ecr-registry: ACCOUNT_ID.dkr.ecr.ap-northeast-2.amazonaws.com
+      ecr-repository: YOUR_REPOSITORY
+      image-tag: example
+      github-repositories: |
+        YOUR_CALLER_REPOSITORY
+        YOUR_PRIVATE_DEPENDENCY
+    secrets:
+      ALPHA_ACTIONS_APP_ID: ${{ secrets.ALPHA_ACTIONS_APP_ID }}
+      ALPHA_ACTIONS_APP_PRIVATE_KEY: ${{ secrets.ALPHA_ACTIONS_APP_PRIVATE_KEY }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+```
+
+성공하면 `<ecr-registry>/<ecr-repository>:example`에 push됩니다. AWS region은 `ap-northeast-2`로 고정되어 있습니다.
+
+### 공통 입력과 인증 범위
 
 | 공통 입력 | 의미 |
 | --- | --- |
 | `github-repositories` | **호출 저장소 자신**과 필요한 private 직접·전이 의존성, 서브모듈의 **저장소 이름**을 쉼표 또는 줄바꿈으로 지정합니다. `owner/repo`나 URL은 사용하지 않습니다. |
 | 생략 또는 빈 `github-repositories` | 호출 조직의 App 설치 대상 전체를 사용합니다. 저장소별 최소 목록을 명시하는 방식을 권장합니다. |
-| `submodules` | 기본 `recursive`. 서브모듈이 없다면 `"false"`로 생략할 수 있습니다. |
+| `submodules` | 기본값은 `recursive`. 서브모듈 checkout이 필요 없으면 문자열 `"false"`를 지정합니다. |
+| `target` | 선택할 Dockerfile 빌드 stage. 생략하면 Dockerfile의 기본 빌드 대상을 사용합니다. |
 
 다른 조직의 private 저장소는 이 조직 설치 토큰으로 접근할 수 없습니다. App 자체의 code 쓰기 권한과 이 빌드가 발급하는 읽기 전용 토큰 권한은 별개이므로, App 설치 범위를 늘리는 결정은 별도 승인이 필요합니다.
+
+GAR의 `gar-region` 기본값은 `asia-northeast3`입니다. 전체 입력과 필수 secret은 [GAR 정의](.github/workflows/build-push-gar.yaml), [ECR 정의](.github/workflows/build-push.yaml)에서 확인할 수 있습니다. checkout 자격증명은 저장하지 않으며, 작업 종료 시 토큰 발급 Action이 토큰을 폐기합니다.
 
 ## Dockerfile 인증
 
@@ -53,41 +105,16 @@ RUN --mount=type=secret,id=github_token,required \
 
 이 예제를 쓰려면 호출 저장소에 위 스크립트를 추가하고 기존 Dockerfile의 `.netrc` 인증을 대체합니다. 빌드에서 secret을 사용하지 않는 서비스도 private 소스 checkout을 위해 App 접근이 필요합니다.
 
-## 소비자와 필요한 저장소 권한
+## 다른 공용 워크플로
 
-2026-10-30 GitHub 기본 브랜치의 배포 워크플로·Dockerfile·의존성 manifest/lock·`.gitmodules` 기준입니다. 모든 활성 호출자는 private이며, 호출 저장소와 표의 private 의존성에 `Contents: read`가 필요합니다. App 설치·조직 secret 접근은 미확인입니다.
+각 파일의 `workflow_call`에 입력·secret·출력이 정의되어 있습니다.
 
-| 호출 저장소 | 공용 경로/ref | private 직접 의존성 | private 전이 의존성 | private 서브모듈 |
-| --- | --- | --- | --- | --- |
-| `alphasquare-base` | GAR `main` | `alphaverse`, `alphaship`, `alphabee` | `alphata` (`alphaship` 경유) | `alpha-contracts` |
-| `alphacrawler` | GAR `main` | `alphabee` | 없음 | 없음 |
-| `alphasquare-virtual-trading-server` | GAR `main` | `alphaverse`, `alphabee` | 없음 | 없음 |
-| `alphasquare-socketio-server` | GAR `ecffc7ce6b868f4d7daa8b375e9ea57079d97516` | 없음 (현재 Rust 빌드) | 없음 | `alpha-contracts` |
-| `alphasquare-data-server` | GAR `main` | `alphaverse`, `alphabee`, `alphata` | 없음 | 없음 |
-| `alphaprime-bot` | GAR `main` | 없음 | 없음 | 없음 |
-| `alphasquare-real-trading-server` | GAR `main` | `alphabee` | 없음 | 없음 |
-| `alphasquare-cluster-ops` | GAR `main` | 없음 | 없음 | 없음 |
-| `koscom-tcp-mediator` | GAR・ECR `main` | `alphabee` | 없음 | 없음 |
+| 용도 | 워크플로 |
+| --- | --- |
+| 이미지 태그 생성 | [staging: commit SHA](.github/workflows/staging-image-tag.yaml), [prod: ref 이름](.github/workflows/prod-image-tag.yaml) |
+| pyproject 버전에 따른 릴리스 생성 | [uv](.github/workflows/auto-release-on-uv-pyproject-version-update.yaml), [Poetry](.github/workflows/auto-release-on-pyproject-version-update.yaml) |
+| 릴리스 초안·PR 버전 라벨 | [릴리스 초안](.github/workflows/draft-release.yaml), [PR 라벨](.github/workflows/pr-version-labeler.yaml) |
+| 배포 manifest 갱신·push | [update-k8s-mainifest.yaml](.github/workflows/update-k8s-mainifest.yaml) |
+| Discord 알림 | [notify-discord.yaml](.github/workflows/notify-discord.yaml) |
 
-`ring`과 `alphastats`는 public이므로 설치 목록에 추가할 필요가 없습니다. `ring`은 crawler·virtual-trading·data에, `alphastats`는 virtual-trading 및 base의 `alphaship` 전이 의존성에 포함됩니다. `alpha-contracts`에는 추가 `.gitmodules`가 없음을 확인했습니다.
-
-최소 설치 집합은 위 활성 호출 저장소 9개 + `alpha-contracts`, `alphaverse`, `alphaship`, `alphabee`, `alphata`입니다. 개별 토큰에는 표의 해당 행과 호출 저장소 자신만 지정합니다. `alpha-actions`·배포 manifest 대상 `alphasquare-infra`의 설치 필요 여부는 빌드 이외 작업의 별도 판단이며 이 빌드 의존성 목록에 포함하지 않습니다.
-
-`alphasquare-main-server`에도 GAR/ECR `main` 호출이 남아 있으나 GitHub에서 archived 상태입니다. 재활성화하면 호출 저장소 자신과 `alphaverse`, `alphabee` 접근을 먼저 준비해야 합니다. `alphaprime-api-bot`는 `alphaprime-bot`로 리다이렉트되는 이전 이름이므로 중복 집계하지 않습니다.
-
-## 전환 조건과 검증 한계
-
-[PR #22](https://github.com/alphaprime-dev/alpha-actions/pull/22)는 다음 조건을 충족하기 전까지 draft로 유지합니다.
-
-1. 활성 호출자와 표의 private 직접·전이 의존성·서브모듈 전체의 App 설치 범위를 승인받습니다. **`alphata`는 private이며 App 추가 승인 대기**입니다.
-2. 각 호출자가 두 App secret에 접근할 수 있어야 합니다. `secrets: inherit`만으로 조직 secret의 허용 저장소가 늘어나지 않습니다. ECR의 기존 AWS 접근도 유지해야 합니다.
-3. `@main` 호출자는 이 PR merge 즉시 새 계약을 사용하므로 기존 호출자 App 미설치·secret 미공유 상태에서 merge하면 checkout 전에 실패합니다. socketio처럼 SHA에 고정된 호출자는 별도 PR에서 새 ref와 인증 입력을 함께 전환해야 합니다.
-4. 실제 App 토큰 발급, private checkout·재귀 서브모듈, 명시적 저장소 범위, Docker 의존성 설치, GAR/ECR push를 승인된 검증 환경에서 확인합니다. 빌드 토큰이 이미지 레이어·환경변수에 남지 않는 검증은 호출 Dockerfile별로 수행해야 합니다.
-
-검증 현황:
-
-- 통과: 전체 워크플로 `actionlint`, 실제 호출 17개를 GAR/ECR 로컬 정의에 연결한 `actionlint`, `git diff --check`.
-- 미실행: 위 4번의 실제 App·빌드·registry 검증.
-- 확인 제한: 조직 App secret 허용 저장소 메타데이터 API는 현재 CLI 권한으로 HTTP 403.
-
-App 설정·조직 secret·서비스별 워크플로·운영 배포는 이 PR에서 수정하지 않습니다.
+기존 호출자의 인증 변경 사항과 서비스별 권한 조사 기록은 [GitHub App 인증 전환 문서](docs/github-app-migration.md)에 정리되어 있습니다.
