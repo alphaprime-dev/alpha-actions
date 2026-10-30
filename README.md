@@ -11,7 +11,7 @@ GAR·ECR 빌드는 GitHub App 인증을 사용합니다. 기존 `ACTIONS_TOKEN` 
 ### 준비
 
 - 호출 저장소에 Dockerfile이 있어야 합니다. `target`을 지정한다면 해당 빌드 stage가 있어야 합니다.
-- GitHub App이 **호출 저장소 자신과 필요한 private 직접·전이 의존성 및 서브모듈**에 설치되어 있어야 합니다. [서비스별 필요 저장소](docs/github-app-migration.md#소비자와-필요한-저장소-권한)를 확인하세요.
+- GitHub App이 **호출 저장소 자신과 필요한 private 직접·전이 의존성 및 서브모듈**에 설치되어 있어야 합니다.
 - 호출 저장소에서 `ALPHA_ACTIONS_APP_ID`, `ALPHA_ACTIONS_APP_PRIVATE_KEY` secret에 접근할 수 있어야 합니다. `secrets: inherit`도 지원하지만 조직 secret의 허용 저장소가 늘어나지는 않습니다.
 - GAR은 대상 repository와 Workload Identity Provider·서비스 계정의 인증 및 push 권한을 준비해야 합니다. ECR은 대상 repository와 `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` secret 및 push 권한이 필요합니다.
 - Docker 빌드 중 private 의존성을 설치한다면 [Dockerfile 인증](#dockerfile-인증)도 설정하세요.
@@ -116,5 +116,3 @@ RUN --mount=type=secret,id=github_token,required \
 | 릴리스 초안·PR 버전 라벨 | [릴리스 초안](.github/workflows/draft-release.yaml), [PR 라벨](.github/workflows/pr-version-labeler.yaml) |
 | 배포 manifest 갱신·push | [update-k8s-mainifest.yaml](.github/workflows/update-k8s-mainifest.yaml) |
 | Discord 알림 | [notify-discord.yaml](.github/workflows/notify-discord.yaml) |
-
-기존 호출자의 인증 변경 사항과 서비스별 권한 조사 기록은 [GitHub App 인증 전환 문서](docs/github-app-migration.md)에 정리되어 있습니다.
