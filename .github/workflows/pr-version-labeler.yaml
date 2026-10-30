@@ -10,7 +10,7 @@ jobs:
   version-labeler:
     runs-on: ubuntu-latest
     steps:
-      - uses: srvaroa/labeler@master
+      - uses: srvaroa/labeler@075ed09ed89dbe3214feeb50731ff61f9ef75cf7 # master
         with:
           config_path: .github/pr-version-labeler.yaml
         env:
