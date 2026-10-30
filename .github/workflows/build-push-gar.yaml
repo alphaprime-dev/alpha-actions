@@ -31,7 +31,7 @@ on:
         type: string
         default: "recursive"
       github-repositories:
-        description: "Repositories needed for checkout, submodules, and dependencies; empty uses the App installation repositories."
+        description: "Comma/newline-separated repository names including the caller and private dependencies; empty uses all App installation repositories."
         required: false
         type: string
     secrets:

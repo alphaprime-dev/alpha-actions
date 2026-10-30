@@ -18,15 +18,42 @@ on:
         required: false
         type: string
         default: "recursive"
+      github-repositories:
+        description: "Comma/newline-separated repository names including the caller and private dependencies; empty uses all App installation repositories."
+        required: false
+        type: string
+    secrets:
+      ALPHA_ACTIONS_APP_ID:
+        required: true
+      ALPHA_ACTIONS_APP_PRIVATE_KEY:
+        required: true
+      AWS_ACCESS_KEY_ID:
+        required: true
+      AWS_SECRET_ACCESS_KEY:
+        required: true
+
+permissions:
+  contents: read
 
 jobs:
   build-push:
     runs-on: ubuntu-latest
     steps:
+      - name: Generate GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ secrets.ALPHA_ACTIONS_APP_ID }}
+          private-key: ${{ secrets.ALPHA_ACTIONS_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: ${{ inputs.github-repositories }}
+          permission-contents: read
+
       - uses: actions/checkout@v4
         with:
           submodules: ${{ inputs.submodules }}
-          token: ${{ secrets.ACTIONS_TOKEN }}
+          token: ${{ steps.app-token.outputs.token }}
+          persist-credentials: false
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -52,4 +79,4 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
           secrets: |
-            "github_token=${{ secrets.ACTIONS_TOKEN }}"
+            "github_token=${{ steps.app-token.outputs.token }}"
