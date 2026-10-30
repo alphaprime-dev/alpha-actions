@@ -69,16 +69,18 @@ GAR의 `gar-region` 기본값은 `asia-northeast3`입니다. 전체 입력과 �
 
 ## Dockerfile 인증
 
-BuildKit secret ID는 `github_token`입니다. 토큰을 `ARG`·`ENV`·이미지 URL에 넣지 않고, secret을 마운트한 단일 명령에만 전달합니다. [with-github-auth.sh](https://github.com/alphaprime-dev/alphasquare-base/blob/main/scripts/with-github-auth.sh)는 `gh` 설치 없이 Git credential helper를 해당 명령에만 적용합니다.
+BuildKit secret ID는 `github_token`입니다. 토큰을 `ARG`·`ENV`·이미지 URL에 넣지 않고, secret을 마운트한 단일 명령에만 전달합니다. 아래 예제는 GitHub용 Git credential helper를 해당 명령에만 적용합니다. 이미지에는 Git과 uv가 설치되어 있어야 합니다.
 
 ```dockerfile
-COPY scripts/with-github-auth.sh scripts/with-github-auth.sh
 RUN --mount=type=secret,id=github_token,required \
     GH_TOKEN="$(cat /run/secrets/github_token)" \
-    sh scripts/with-github-auth.sh uv sync --locked --no-install-project --no-editable --no-dev
+    GIT_CONFIG_COUNT=1 \
+    GIT_CONFIG_KEY_0=credential.https://github.com.helper \
+    GIT_CONFIG_VALUE_0='!f() { printf "%s\n" "username=x-access-token" "password=$GH_TOKEN"; }; f' \
+    uv sync --locked --no-install-project --no-editable --no-dev
 ```
 
-이 예제를 쓰려면 호출 저장소의 `scripts/with-github-auth.sh` 경로에 위 스크립트를 추가하세요. 빌드에서 secret을 사용하지 않는 서비스도 private 소스 checkout을 위해 App 접근이 필요합니다.
+빌드에서 secret을 사용하지 않는 서비스도 private 소스 checkout을 위해 App 접근이 필요합니다.
 
 ## 다른 공용 워크플로
 
