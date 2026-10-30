@@ -92,14 +92,4 @@ jobs:
           COMMIT_MESSAGE: Bump up ${{ github.repository }} to ${{ inputs.value }}
           FILE_PATH: ${{ inputs.file-path }}
           TARGET_BRANCH: ${{ inputs.target-branch }}
-        run: |
-          if git diff --quiet -- "$FILE_PATH"; then
-            echo "No manifest changes to commit."
-            exit 0
-          fi
-
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add "$FILE_PATH"
-          git commit -m "$COMMIT_MESSAGE"
-          git push origin "HEAD:$TARGET_BRANCH"
+        run: bash ../alpha-actions/scripts/commit-manifest.sh
