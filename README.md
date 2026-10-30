@@ -34,11 +34,11 @@ jobs:
 
 | 공통 입력 | 의미 |
 | --- | --- |
-| `github-repositories` | 호출 저장소와 필요한 private 직접·전이 의존성, 서브모듈의 **저장소 이름**을 쉼표 또는 줄바꿈으로 지정합니다. `owner/repo`나 URL은 사용하지 않습니다. |
-| 생략 또는 빈 `github-repositories` | 호출 조직의 App 설치 대상 전체를 사용합니다. 기존 호출자가 입력 없이 전환할 때도 호출 저장소와 모든 private 의존성이 설치 대상이어야 합니다. 저장소별 최소 목록을 명시하는 방식을 권장합니다. |
+| `github-repositories` | **호출 저장소 자신**과 필요한 private 직접·전이 의존성, 서브모듈의 **저장소 이름**을 쉼표 또는 줄바꿈으로 지정합니다. `owner/repo`나 URL은 사용하지 않습니다. |
+| 생략 또는 빈 `github-repositories` | 호출 조직의 App 설치 대상 전체를 사용합니다. 저장소별 최소 목록을 명시하는 방식을 권장합니다. |
 | `submodules` | 기본 `recursive`. 서브모듈이 없다면 `"false"`로 생략할 수 있습니다. |
 
-명시한 목록에는 **호출 저장소 자신도** 포함해야 합니다. 다른 조직의 private 저장소는 이 조직 설치 토큰으로 접근할 수 없습니다. App 자체의 code 쓰기 권한과 이 빌드가 발급하는 읽기 전용 토큰 권한은 별개이므로, App 설치 범위를 늘리는 결정은 별도 승인이 필요합니다.
+다른 조직의 private 저장소는 이 조직 설치 토큰으로 접근할 수 없습니다. App 자체의 code 쓰기 권한과 이 빌드가 발급하는 읽기 전용 토큰 권한은 별개이므로, App 설치 범위를 늘리는 결정은 별도 승인이 필요합니다.
 
 ## Dockerfile 인증
 
@@ -51,11 +51,11 @@ RUN --mount=type=secret,id=github_token,required \
     sh scripts/with-github-auth.sh uv sync --locked --no-install-project --no-editable --no-dev
 ```
 
-공용 워크플로는 호출자의 Dockerfile을 바꾸지 않습니다. 위 스크립트는 호출 저장소에 있어야 하며, 기존 Dockerfile의 `.netrc` 인증을 없애는 변경도 호출 저장소에서 진행해야 합니다. 빌드에서 secret을 사용하지 않는 서비스도 private 소스 checkout을 위해 App 접근이 필요합니다.
+이 예제를 쓰려면 호출 저장소에 위 스크립트를 추가하고 기존 Dockerfile의 `.netrc` 인증을 대체합니다. 빌드에서 secret을 사용하지 않는 서비스도 private 소스 checkout을 위해 App 접근이 필요합니다.
 
 ## 소비자와 필요한 저장소 권한
 
-2026-10-30 GitHub 기본 브랜치의 배포 워크플로·Dockerfile·의존성 manifest/lock·`.gitmodules`를 읽어 확인했습니다. 로컬 checkout에는 오래된 파일이 있어 기본 브랜치를 기준으로 했습니다. 아래 목록은 App 설치 제안이며 실제 설치·조직 secret 접근을 확인한 결과가 아닙니다. 모든 활성 호출자는 private이며, 표의 모든 private 항목에 이 빌드 토큰의 `Contents: read`가 필요합니다.
+2026-10-30 GitHub 기본 브랜치의 배포 워크플로·Dockerfile·의존성 manifest/lock·`.gitmodules` 기준입니다. 모든 활성 호출자는 private이며, 호출 저장소와 표의 private 의존성에 `Contents: read`가 필요합니다. App 설치·조직 secret 접근은 미확인입니다.
 
 | 호출 저장소 | 공용 경로/ref | private 직접 의존성 | private 전이 의존성 | private 서브모듈 |
 | --- | --- | --- | --- | --- |
@@ -69,19 +69,25 @@ RUN --mount=type=secret,id=github_token,required \
 | `alphasquare-cluster-ops` | GAR `main` | 없음 | 없음 | 없음 |
 | `koscom-tcp-mediator` | GAR・ECR `main` | `alphabee` | 없음 | 없음 |
 
-`ring`과 `alphastats`는 public이므로 설치 목록에 추가할 필요가 없습니다. `ring`은 crawler·virtual-trading·data에, `alphastats`는 virtual-trading 및 base의 `alphaship` 전이 의존성에 포함됩니다. `alphata`는 **private이며 App 추가 승인 대기**입니다. `alpha-contracts`에는 추가 `.gitmodules`가 없음을 확인했습니다.
+`ring`과 `alphastats`는 public이므로 설치 목록에 추가할 필요가 없습니다. `ring`은 crawler·virtual-trading·data에, `alphastats`는 virtual-trading 및 base의 `alphaship` 전이 의존성에 포함됩니다. `alpha-contracts`에는 추가 `.gitmodules`가 없음을 확인했습니다.
 
 최소 설치 집합은 위 활성 호출 저장소 9개 + `alpha-contracts`, `alphaverse`, `alphaship`, `alphabee`, `alphata`입니다. 개별 토큰에는 표의 해당 행과 호출 저장소 자신만 지정합니다. `alpha-actions`·배포 manifest 대상 `alphasquare-infra`의 설치 필요 여부는 빌드 이외 작업의 별도 판단이며 이 빌드 의존성 목록에 포함하지 않습니다.
 
-`alphasquare-main-server`에도 GAR/ECR `main` 호출이 남아 있으나 GitHub에서 archived 상태입니다. 재활성화하면 호출 저장소 자신과 `alphaverse`, `alphabee` 접근을 먼저 준비해야 합니다. `alphaprime-api-bot`는 `alphaprime-bot`로 리다이렉트되는 이전 이름이므로 중복 집계하지 않습니다. 조직 코드 검색은 archived 저장소를 누락하므로 알려진 저장소의 기본 브랜치 API도 대조했습니다.
+`alphasquare-main-server`에도 GAR/ECR `main` 호출이 남아 있으나 GitHub에서 archived 상태입니다. 재활성화하면 호출 저장소 자신과 `alphaverse`, `alphabee` 접근을 먼저 준비해야 합니다. `alphaprime-api-bot`는 `alphaprime-bot`로 리다이렉트되는 이전 이름이므로 중복 집계하지 않습니다.
 
 ## 전환 조건과 검증 한계
 
 [PR #22](https://github.com/alphaprime-dev/alpha-actions/pull/22)는 다음 조건을 충족하기 전까지 draft로 유지합니다.
 
-1. coordinator가 활성 호출자 전체와 private 직접·전이 의존성·서브모듈의 App 설치 범위를 취합하고 승인받습니다. 특히 `alphata`는 승인이 필요합니다. App 설정은 이 PR에서 변경하지 않습니다.
+1. 활성 호출자와 표의 private 직접·전이 의존성·서브모듈 전체의 App 설치 범위를 승인받습니다. **`alphata`는 private이며 App 추가 승인 대기**입니다.
 2. 각 호출자가 두 App secret에 접근할 수 있어야 합니다. `secrets: inherit`만으로 조직 secret의 허용 저장소가 늘어나지 않습니다. ECR의 기존 AWS 접근도 유지해야 합니다.
 3. `@main` 호출자는 이 PR merge 즉시 새 계약을 사용하므로 기존 호출자 App 미설치·secret 미공유 상태에서 merge하면 checkout 전에 실패합니다. socketio처럼 SHA에 고정된 호출자는 별도 PR에서 새 ref와 인증 입력을 함께 전환해야 합니다.
 4. 실제 App 토큰 발급, private checkout·재귀 서브모듈, 명시적 저장소 범위, Docker 의존성 설치, GAR/ECR push를 승인된 검증 환경에서 확인합니다. 빌드 토큰이 이미지 레이어·환경변수에 남지 않는 검증은 호출 Dockerfile별로 수행해야 합니다.
 
-이 저장소 전체 워크플로의 `actionlint`, 활성 소비자의 실제 호출 워크플로 17개를 수정한 GAR/ECR 로컬 정의에 연결한 `actionlint`, `git diff --check`가 통과했습니다. 실제 App 토큰·registry push·전체 Docker 빌드는 실행하지 않았습니다. 조직 App secret의 허용 저장소 메타데이터 조회는 현재 CLI 권한으로 HTTP 403이므로 secret 가용성은 미확인입니다. App 설정·조직 secret·서비스별 워크플로·운영 배포는 이 PR에서 수정하지 않습니다.
+검증 현황:
+
+- 통과: 전체 워크플로 `actionlint`, 실제 호출 17개를 GAR/ECR 로컬 정의에 연결한 `actionlint`, `git diff --check`.
+- 미실행: 위 4번의 실제 App·빌드·registry 검증.
+- 확인 제한: 조직 App secret 허용 저장소 메타데이터 API는 현재 CLI 권한으로 HTTP 403.
+
+App 설정·조직 secret·서비스별 워크플로·운영 배포는 이 PR에서 수정하지 않습니다.
